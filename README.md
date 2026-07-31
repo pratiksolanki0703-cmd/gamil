@@ -66,7 +66,7 @@ Before you begin, make sure you have:
 
 - [ ] **Cloudflare Account** - [Sign up here](https://dash.cloudflare.com/sign-up)
 - [ ] **Resend Account** - [Sign up here](https://resend.com)
-- [ ] **Vercel Account** - [Sign up here](https://vercel.com)
+- [ ] **GitHub Account** - [Sign up here](https://github.com)
 - [ ] **Custom Domain** - Added to your Cloudflare account
 
 ## 🚀 Quick Start
@@ -214,26 +214,28 @@ export default {
 3. Create an API key
 4. Add the API key to your Worker environment variables
 
-### Step 6: Deploy Frontend
+### Step 6: Deploy Frontend (GitHub Pages)
 
-1. Install dependencies:
+The frontend auto-deploys to GitHub Pages when you push to `main` branch.
+
+1. Push your code:
    ```bash
-   cd frontend
-   npm install
+   git push origin main
    ```
 
-2. Update `.env.local`:
-   ```
-   NEXT_PUBLIC_API_URL=https://your-worker.workers.dev
-   ```
+2. Go to GitHub → **Settings** → **Pages**
+3. Under **Source**, select **GitHub Actions**
+4. Wait for deployment (~2 minutes)
 
-3. Deploy to Vercel:
-   ```bash
-   npm i -g vercel
-   vercel
-   ```
+Your site will be live at:
+```
+https://YOUR_USERNAME.github.io/gamil/
+```
 
-4. Update `config.js` with your Vercel URL
+5. Update `config.js` with your GitHub Pages URL:
+   ```javascript
+   frontendUrl: "https://YOUR_USERNAME.github.io/gamil"
+   ```
 
 ## 🔧 Configuration Reference
 
@@ -292,7 +294,7 @@ This stack is **completely free** for most users:
 | Cloudflare D1 | 5GB storage, 5M reads/day |
 | Cloudflare Email Routing | Unlimited |
 | Resend | 100 emails/day |
-| Vercel | 100GB bandwidth/month |
+| GitHub Pages | 100GB bandwidth/month |
 
 ## 🔐 Security Notes
 
@@ -314,8 +316,8 @@ This stack is **completely free** for most users:
 - Check Worker logs for errors
 
 **Frontend not loading?**
-- Check `NEXT_PUBLIC_API_URL` in `.env.local`
 - Verify Worker is deployed and accessible
+- Check `workerUrl` in `config.js` is correct
 - Check browser console for CORS errors
 
 ## 🤝 Contributing

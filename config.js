@@ -23,6 +23,7 @@ export default {
   // Cloudflare Worker URL (public)
   workerUrl: "https://your-worker.your-subdomain.workers.dev",
   
-  // Frontend URL (public)
-  frontendUrl: "https://your-app.vercel.app",
+  // Frontend URL (GitHub Pages)
+  // Username badlo apna GitHub username se
+  frontendUrl: "https://pratiksolanki0703-cmd.github.io/gamil",
 };
