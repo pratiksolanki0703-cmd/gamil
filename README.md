@@ -15,7 +15,7 @@ A free, self-hosted alternative to Zoho Business Mail. Manage your custom domain
 - ✅ **Email Threading** - Conversations are grouped like Gmail
 - ✅ **Send & Receive** - Full email functionality via Resend API
 - ✅ **Beautiful UI** - Modern, responsive interface with Tailwind CSS
-- ✅ **Free Hosting** - Deploy to Vercel (frontend) + Cloudflare (backend)
+- ✅ **Free Hosting** - GitHub Pages (frontend) + Cloudflare (backend)
 - ✅ **Open Source** - Fork, customize, and deploy your own instance
 
 ## 🏗️ Architecture
@@ -52,7 +52,7 @@ A free, self-hosted alternative to Zoho Business Mail. Manage your custom domain
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────┐
-│              FRONTEND (Next.js on Vercel)                │
+│              FRONTEND (Next.js on GitHub Pages)           │
 │                                                         │
 │  - Gmail-like interface                                 │
 │  - Conversation threading                               │
@@ -133,12 +133,16 @@ export default {
   defaultFromEmail: "hello@yourdomain.com",
   senderName: "Your Name",
   workerUrl: "https://your-worker.workers.dev", // Will fill after deploying worker
-  frontendUrl: "https://your-app.vercel.app",   // Will fill after deploying frontend
-  cloudflareAccountId: "YOUR_ACCOUNT_ID",
-  d1DatabaseId: "YOUR_DATABASE_ID",             // Will fill after creating D1
-  resendApiKey: "YOUR_RESEND_API_KEY",
+  frontendUrl: "https://YOUR_USERNAME.github.io/gamil",  // GitHub Pages URL
 };
 ```
+
+> ⚠️ **Important:** `config.js` is for documentation only. The frontend uses `.env.local` for API URL.
+> Create `frontend/.env.local` with:
+> ```
+> NEXT_PUBLIC_API_URL=https://your-worker.workers.dev
+> NEXT_PUBLIC_API_KEY=your-api-key-here
+> ```
 
 ### Step 3: Setup Cloudflare Worker
 
@@ -246,7 +250,7 @@ https://YOUR_USERNAME.github.io/gamil/
 | `defaultFromEmail` | Default sender email | `hello@text2tool.in` |
 | `senderName` | Name shown in sent emails | `Text2Tool` |
 | `workerUrl` | Your Cloudflare Worker URL | `https://gamil-worker.workers.dev` |
-| `frontendUrl` | Your Vercel deployment URL | `https://gamil.vercel.app` |
+| `frontendUrl` | Your GitHub Pages URL | `https://username.github.io/gamil` |
 | `cloudflareAccountId` | Your Cloudflare Account ID | `abc123...` |
 | `d1DatabaseId` | Your D1 Database ID | `xyz789...` |
 | `resendApiKey` | Your Resend API Key | `re_abc123...` |
@@ -300,7 +304,8 @@ This stack is **completely free** for most users:
 
 - Never commit your API keys to Git
 - Use `wrangler secret put` for sensitive variables
-- The frontend uses CORS to protect your API
+- Set `FRONTEND_URL` in Worker to your GitHub Pages URL for CORS security
+- Example: `wrangler secret put FRONTEND_URL` → enter `https://YOUR_USERNAME.github.io`
 - Consider adding authentication if making public
 
 ## 🐛 Troubleshooting
