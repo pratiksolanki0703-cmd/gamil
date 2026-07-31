@@ -230,11 +230,12 @@ The frontend auto-deploys to GitHub Pages when you push to `main` branch.
 2. Go to GitHub → **Settings** → **Pages**
 3. Under **Source**, select **GitHub Actions**
 4. Wait for deployment (~2 minutes)
+5. Your site will be live at:
+   ```
+   https://YOUR_USERNAME.github.io/gamil/
+   ```
 
-Your site will be live at:
-```
-https://YOUR_USERNAME.github.io/gamil/
-```
+> ⚠️ **Important:** Make sure GitHub Pages is enabled in your repo Settings → Pages → Source: "GitHub Actions"
 
 5. Update `config.js` with your GitHub Pages URL:
    ```javascript
