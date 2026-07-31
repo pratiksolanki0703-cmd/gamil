@@ -321,6 +321,7 @@ This stack is **completely free** for most users:
 - Check Worker logs for errors
 
 **Frontend not loading?**
+- Check `frontend/.env.local` → `NEXT_PUBLIC_API_URL` is correct
 - Verify Worker is deployed and accessible
 - Check `workerUrl` in `config.js` is correct
 - Check browser console for CORS errors
