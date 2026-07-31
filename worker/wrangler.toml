@@ -1,0 +1,14 @@
+name = "gamil-worker"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "gamil-emails"
+database_id = "YOUR_D1_DATABASE_ID_HERE"
+
+# Environment Variables (set via wrangler secret put or .env)
+[vars]
+RESEND_API_KEY = ""
+FRONTEND_URL = "http://localhost:3000"

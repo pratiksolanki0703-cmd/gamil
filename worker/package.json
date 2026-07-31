@@ -1,0 +1,15 @@
+{
+  "name": "gamil-worker",
+  "version": "1.0.0",
+  "description": "GAMIL Email Management System - Cloudflare Worker Backend",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute gamil-emails --file=./schema.sql",
+    "db:init:local": "wrangler d1 execute gamil-emails --local --file=./schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
