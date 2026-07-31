@@ -251,32 +251,31 @@ https://YOUR_USERNAME.github.io/gamil/
 | `senderName` | Name shown in sent emails | `Text2Tool` |
 | `workerUrl` | Your Cloudflare Worker URL | `https://gamil-worker.workers.dev` |
 | `frontendUrl` | Your GitHub Pages URL | `https://username.github.io/gamil` |
-| `cloudflareAccountId` | Your Cloudflare Account ID | `abc123...` |
-| `d1DatabaseId` | Your D1 Database ID | `xyz789...` |
-| `resendApiKey` | Your Resend API Key | `re_abc123...` |
+
+**Frontend Environment Variables** (create `frontend/.env.local`):
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_API_URL` | Your Worker URL | `https://your-worker.workers.dev` |
+| `NEXT_PUBLIC_API_KEY` | Your API key (same as Worker secret) | `your-secret-api-key` |
 
 ## 📁 Project Structure
 
 ```
 gamil/
 ├── config.js              # Configuration file (EDIT THIS!)
-├── .env.example           # Environment variables template
+├── worker.js              # ⭐ Cloudflare Worker (main file to edit)
+├── setup.sh               # CLI setup script
+├── MANUAL-SETUP.md        # Dashboard setup guide
 ├── README.md              # This file
-├── worker/                # Cloudflare Worker (Backend)
-│   ├── wrangler.toml      # Worker configuration
-│   ├── package.json       # Worker dependencies
-│   ├── schema.sql         # Database schema
-│   └── src/
-│       ├── index.js       # Main worker entry
-│       └── endpoints/
-│           ├── receive-email.js
-│           ├── send-email.js
-│           ├── conversations.js
-│           ├── mark-read.js
-│           └── helpers.js
+├── LICENSE                # MIT License
+├── .github/workflows/     # GitHub Actions (auto-deploy)
+│   └── deploy.yml
+├── worker/                # Worker supporting files
+│   └── schema.sql         # Database schema
 └── frontend/              # Next.js Frontend
-    ├── package.json
-    ├── tailwind.config.js
+    ├── .env.local         # Environment variables (CREATE THIS!)
+    ├── lib/api.js         # API client
     ├── app/
     │   ├── layout.js
     │   ├── page.js
