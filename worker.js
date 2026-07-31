@@ -302,7 +302,8 @@ async function handleGetConversations(env) {
   const { results } = await env.DB.prepare(`
     SELECT c.*, 
       (SELECT body FROM messages WHERE conversation_id = c.id ORDER BY received_at DESC LIMIT 1) as last_message_preview,
-      (SELECT from_email FROM messages WHERE conversation_id = c.id ORDER BY received_at DESC LIMIT 1) as last_sender
+      (SELECT from_email FROM messages WHERE conversation_id = c.id ORDER BY received_at DESC LIMIT 1) as last_sender,
+      (SELECT is_outgoing FROM messages WHERE conversation_id = c.id ORDER BY received_at DESC LIMIT 1) as last_is_outgoing
     FROM conversations c ORDER BY c.last_message_at DESC
   `).all();
 

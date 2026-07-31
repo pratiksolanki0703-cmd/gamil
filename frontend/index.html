@@ -511,6 +511,7 @@
         </div>
         
         <div class="modal-actions">
+          <button class="btn btn-ghost" @click="localStorage.removeItem("gamil_workerUrl"); localStorage.removeItem("gamil_apiKey"); settingsWorkerUrl=""; settingsApiKey=""; settingsSuccess="Settings cleared. Enter new values.";">Reset to Defaults</button>
           <button class="btn btn-secondary" @click="closeSettings()">Cancel</button>
           <button class="btn btn-primary" @click="saveSettings()">Save & Connect</button>
         </div>
