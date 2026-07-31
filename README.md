@@ -1,4 +1,10 @@
-# 📧 GAMIL - Self-Hosted Email Management System
+# 📧 text2tool.in - Email
+
+> A free, self-hosted email management system like Zoho Mail
+> 
+> **Built by [Pratik Solanki](https://text2tool.in)**
+
+---
 
 A free, self-hosted alternative to Zoho Business Mail. Manage your custom domain emails with a beautiful Gmail-like interface.
 
@@ -324,12 +330,25 @@ This stack is **completely free** for most users:
 
 This project is open source and available under the [MIT License](LICENSE).
 
+## 👨‍💻 Built By
+
+| | |
+|---|---|
+| **Developer** | Pratik Solanki |
+| **Website** | [text2tool.in](https://text2tool.in) |
+| **Email** | pratik@text2tool.in |
+
+---
+
 ## 🙏 Credits
 
 - Built with Cloudflare Workers, D1, and Email Routing
 - Frontend powered by Next.js and Tailwind CSS
 - Email sending via Resend
+- Glass morphism UI design
 
 ---
 
-**Made with ❤️ for the community**
+**Made with ❤️ by [Pratik Solanki](https://text2tool.in) for the community**
+
+⭐ If you find this useful, give it a star on GitHub!
