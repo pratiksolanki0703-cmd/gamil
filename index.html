@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<!--
+  ============================================
+  📧 GAMIL - Email Management Frontend
+  ============================================
+  
+  ⚠️ HOW TO CONFIGURE:
+  
+  1. Open js/config.js in any text editor
+  2. Set your Worker URL and API Key
+  3. Save and push to GitHub
+  
+  OR
+  
+  1. Open the app in browser
+  2. Click the ⚙️ Settings button
+  3. Enter your Worker URL and API Key
+  
+  No build step, no npm, no Node.js required!
+  ============================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>text2tool.in - Email | Self-Hosted Email Management</title>
+  
+  <!-- Meta Tags -->
+  <meta name="description" content="A free, self-hosted email management system like Zoho Mail. Manage your custom domain emails with a beautiful Gmail-like interface.">
+  <meta name="keywords" content="email, self-hosted, cloudflare, email management, zoho alternative">
+  <meta name="author" content="Pratik Solanki">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="text2tool.in - Email">
+  <meta property="og:description" content="Self-hosted email management system">
+  <meta property="og:type" content="website">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📧</text></svg>">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <!-- Alpine.js -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  
+  <!-- Scripts (order matters) -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</head>
+<body x-data="gamilApp()" x-init="init()">
+  
+  <!-- Mobile Menu Button -->
+  <button 
+    @click="toggleSidebar()"
+    class="mobile-menu-btn"
+    :class="sidebarOpen ? 'hidden' : ''"
+  >
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
+  
+  <!-- Mobile Overlay -->
+  <div 
+    x-show="sidebarOpen"
+    @click="closeSidebar()"
+    x-transition.opacity
+    class="fixed inset-0 bg-black/30 z-30 md:hidden"
+    style="display: none;"
+  ></div>
+
+  <div class="app-container">
+    
+    <!-- ============================================
+         SIDEBAR
+         ============================================ -->
+    <aside 
+      class="sidebar"
+      :class="sidebarOpen ? 'open' : ''"
+    >
+      <!-- Sidebar Header -->
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-icon">📧</div>
+          <div class="sidebar-logo-text">
+            <h1 class="gradient-text" x-text="APP_CONFIG?.appName || 'Email'"></h1>
+            <p x-text="APP_CONFIG?.appSubtitle || 'text2tool.in'"></p>
+          </div>
+        </div>
+        
+        <!-- Search -->
+        <div class="sidebar-search">
+          <svg class="sidebar-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search emails..."
+            x-model.debounce.300ms="searchQuery"
+          >
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+        <div 
+          class="nav-item"
+          :class="selectedNav === 'inbox' ? 'active' : ''"
+          @click="selectNav('inbox')"
+        >
+          <span class="nav-item-icon">📥</span>
+          <span>Inbox</span>
+          <template x-if="totalUnread > 0">
+            <span class="nav-item-badge" x-text="totalUnread"></span>
+          </template>
+        </div>
+        
+        <div 
+          class="nav-item"
+          :class="selectedNav === 'sent' ? 'active' : ''"
+          @click="selectNav('sent')"
+        >
+          <span class="nav-item-icon">📤</span>
+          <span>Sent</span>
+        </div>
+        
+        <div 
+          class="nav-item"
+          :class="selectedNav === 'all' ? 'active' : ''"
+          @click="selectNav('all')"
+        >
+          <span class="nav-item-icon">📬</span>
+          <span>All Mail</span>
+          <span class="nav-item-badge" x-text="conversations.length"></span>
+        </div>
+      </nav>
+
+      <!-- Email Tabs -->
+      <div class="email-tabs">
+        <button
+          class="email-tab"
+          :class="selectedEmail === 'all' ? 'active' : ''"
+          @click="selectEmailTab('all')"
+        >All</button>
+        
+        <template x-for="email in emailAddresses.filter(e => e && !e.includes('noreply')).slice(0, 4)" :key="email">
+          <button
+            class="email-tab"
+            :class="selectedEmail === email ? 'active' : ''"
+            @click="selectEmailTab(email)"
+            x-text="email.split('@')[0]"
+          ></button>
+        </template>
+      </div>
+
+      <!-- Conversations List -->
+      <div class="conversations-list">
+        <!-- Loading Skeletons -->
+        <template x-if="loading">
+          <div>
+            <template x-for="i in 5" :key="i">
+              <div class="conversation-item">
+                <div style="display: flex; gap: 12px;">
+                  <div class="skeleton skeleton-avatar"></div>
+                  <div style="flex: 1;">
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text-short"></div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <!-- Empty State -->
+        <template x-if="!loading && filteredConversations.length === 0">
+          <div style="text-align: center; padding: 48px 16px;">
+            <div style="font-size: 48px; margin-bottom: 12px;">📭</div>
+            <p style="color: #6b7280; margin-bottom: 4px;">No conversations</p>
+            <p style="color: #9ca3af; font-size: 0.875rem;">Send an email to get started!</p>
+          </div>
+        </template>
+
+        <!-- Conversation Items -->
+        <template x-if="!loading && filteredConversations.length > 0">
+          <div>
+            <template x-for="(conv, index) in filteredConversations" :key="conv.id">
+              <div
+                class="conversation-item fade-in"
+                :class="{
+                  'active': selectedConversation?.id === conv.id,
+                  'unread': conv.unread_count > 0
+                }"
+                @click="selectConversation(conv.id)"
+                :style="'animation-delay: ' + (index * 0.05) + 's'"
+              >
+                <div class="conversation-header">
+                  <span class="conversation-subject" x-text="conv.subject"></span>
+                  <template x-if="conv.unread_count > 0">
+                    <span class="conversation-badge" x-text="conv.unread_count"></span>
+                  </template>
+                </div>
+                <p class="conversation-preview" x-text="truncate(conv.last_message_preview)"></p>
+                <div class="conversation-meta">
+                  <span class="conversation-sender" x-text="conv.last_sender"></span>
+                  <span x-text="formatDate(conv.last_message_at)"></span>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <p>
+          Built by 
+          <a href="https://text2tool.in" target="_blank" rel="noopener noreferrer">Pratik Solanki</a>
+        </p>
+      </div>
+    </aside>
+
+    <!-- ============================================
+         MAIN CONTENT
+         ============================================ -->
+    <main class="main-content">
+      
+      <!-- Error Alert -->
+      <template x-if="error">
+        <div class="alert alert-error fade-in">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+          <span x-text="error"></span>
+        </div>
+      </template>
+
+      <!-- Conversation View -->
+      <template x-if="selectedConversation">
+        <div style="display: flex; flex-direction: column; height: 100%;">
+          
+          <!-- Header -->
+          <div class="main-header">
+            <div class="main-header-content">
+              <div class="main-header-info">
+                <h2 class="main-header-title gradient-text" x-text="selectedConversation.subject"></h2>
+                <p class="main-header-subtitle" x-text="selectedConversation.participants?.join(' • ')"></p>
+              </div>
+              <button class="btn btn-primary" @click="openReply()">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                </svg>
+                Reply
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages -->
+          <div class="messages-container">
+            <template x-if="messages.length === 0">
+              <div style="text-align: center; padding: 48px;">
+                <div style="font-size: 48px; margin-bottom: 12px;">💬</div>
+                <p style="color: #6b7280;">No messages in this conversation</p>
+              </div>
+            </template>
+            
+            <template x-for="(msg, index) in messages" :key="msg.id">
+              <div
+                class="message-item fade-in"
+                :class="msg.is_outgoing ? 'outgoing' : 'incoming'"
+                :style="'animation-delay: ' + (index * 0.1) + 's'"
+              >
+                <div class="message-header">
+                  <div class="message-sender-info">
+                    <div 
+                      class="message-avatar"
+                      :class="msg.is_outgoing ? 'outgoing' : 'incoming'"
+                      :style="'background: ' + getAvatarColor(msg.from_email)"
+                    >
+                      <span x-text="getInitials(msg.from_email)"></span>
+                    </div>
+                    <div>
+                      <p class="message-sender-name" x-text="msg.from_email"></p>
+                      <p class="message-recipient">To: <span x-text="msg.to_email"></span></p>
+                    </div>
+                  </div>
+                  <span class="message-time" x-text="formatDateTime(msg.received_at)"></span>
+                </div>
+                <div class="message-body" x-html="GamilUtils.parseEmailBody(msg.body)"></div>
+                <template x-if="!msg.is_outgoing">
+                  <button class="message-reply-btn" @click="openReply(msg)">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                    </svg>
+                    Reply
+                  </button>
+                </template>
+              </div>
+            </template>
+          </div>
+
+          <!-- Reply Box -->
+          <template x-if="showReply">
+            <div class="reply-box fade-in">
+              <div class="reply-box-header">
+                <h3 class="reply-box-title">
+                  <svg width="20" height="20" fill="none" stroke="#3b82f6" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                  </svg>
+                  <span x-text="replyTo ? 'Reply to ' + replyTo.from_email : 'New Email'"></span>
+                </h3>
+                <button class="reply-box-close" @click="closeReply()">✕</button>
+              </div>
+
+              <template x-if="replyError">
+                <div class="alert alert-error" style="margin: 0 0 16px 0;">
+                  <span x-text="replyError"></span>
+                </div>
+              </template>
+
+              <div class="reply-form">
+                <div class="reply-field">
+                  <label>To</label>
+                  <input
+                    type="email"
+                    x-model="replyToEmail"
+                    placeholder="recipient@example.com"
+                  >
+                </div>
+
+                <div class="reply-field">
+                  <label>Subject</label>
+                  <input
+                    type="text"
+                    x-model="replySubject"
+                  >
+                </div>
+
+                <div class="reply-field">
+                  <label>Message</label>
+                  <textarea
+                    x-model="replyBody"
+                    rows="5"
+                    placeholder="Type your reply..."
+                  ></textarea>
+                </div>
+
+                <div class="reply-actions">
+                  <button class="btn btn-secondary" @click="closeReply()">Cancel</button>
+                  <button 
+                    class="btn btn-primary"
+                    @click="sendReply()"
+                    :disabled="sending"
+                  >
+                    <template x-if="sending">
+                      <span style="display: flex; align-items: center; gap: 8px;">
+                        <svg class="spin-slow" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Sending...
+                      </span>
+                    </template>
+                    <template x-if="!sending">
+                      <span style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                        Send Reply
+                      </span>
+                    </template>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+
+      <!-- Empty State (No conversation selected) -->
+      <template x-if="!selectedConversation">
+        <div class="empty-state">
+          <div class="empty-state-card fade-in">
+            <!-- Icon -->
+            <div class="empty-state-icon">
+              <div class="empty-state-icon-main pulse-glow">📧</div>
+              <div class="empty-state-icon-badge bounce">✓</div>
+            </div>
+
+            <!-- Title -->
+            <h1 class="empty-state-title gradient-text">text2tool.in - Email</h1>
+            <p class="empty-state-subtitle">Your self-hosted email management system</p>
+
+            <!-- Getting Started -->
+            <div class="empty-state-steps fade-in delay-1">
+              <h3>
+                <span>1</span>
+                Getting Started
+              </h3>
+              <ul>
+                <li>
+                  <span>✅</span>
+                  <span>Configure Worker URL in Settings ⚙️</span>
+                </li>
+                <li>
+                  <span>✅</span>
+                  <span>Set up Cloudflare Email Routing</span>
+                </li>
+                <li>
+                  <span>✅</span>
+                  <span>Deploy your Worker to Cloudflare</span>
+                </li>
+                <li>
+                  <span>🚀</span>
+                  <span>Start receiving emails!</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Features -->
+            <div class="empty-state-features fade-in delay-2">
+              <div class="empty-state-feature">
+                <div class="empty-state-feature-icon">📨</div>
+                <div class="empty-state-feature-label">Receive Emails</div>
+              </div>
+              <div class="empty-state-feature">
+                <div class="empty-state-feature-icon">📤</div>
+                <div class="empty-state-feature-label">Send Emails</div>
+              </div>
+              <div class="empty-state-feature">
+                <div class="empty-state-feature-icon">💬</div>
+                <div class="empty-state-feature-label">Threading</div>
+              </div>
+              <div class="empty-state-feature">
+                <div class="empty-state-feature-icon">🔍</div>
+                <div class="empty-state-feature-label">Search</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Credit -->
+          <div class="fade-in delay-3" style="text-align: center; margin-top: 32px;">
+            <p style="color: #6b7280; font-size: 0.875rem;">
+              Built with ❤️ by 
+              <a href="https://text2tool.in" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; font-weight: 500;">Pratik Solanki</a>
+            </p>
+            <p style="color: #9ca3af; font-size: 0.75rem; margin-top: 4px;">text2tool.in • Open Source Email Management</p>
+          </div>
+        </div>
+      </template>
+    </main>
+  </div>
+
+  <!-- Settings FAB -->
+  <button 
+    class="settings-fab"
+    @click="openSettings()"
+    title="Settings"
+  >
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  </button>
+
+  <!-- ============================================
+       SETTINGS MODAL
+       ============================================ -->
+  <template x-if="showSettings">
+    <div class="modal-overlay" @click.self="closeSettings()">
+      <div class="modal">
+        <h2 class="modal-title">⚙️ Settings</h2>
+        <p class="modal-subtitle">Enter your Cloudflare Worker URL and API Key to connect.</p>
+        
+        <template x-if="settingsError">
+          <div class="alert alert-error" style="margin: 0 0 16px 0;">
+            <span x-text="settingsError"></span>
+          </div>
+        </template>
+        
+        <template x-if="settingsSuccess">
+          <div class="alert alert-success" style="margin: 0 0 16px 0;">
+            <span x-text="settingsSuccess"></span>
+          </div>
+        </template>
+        
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="reply-field">
+            <label>Worker URL</label>
+            <input
+              type="url"
+              x-model="settingsWorkerUrl"
+              placeholder="https://your-worker.workers.dev"
+            >
+          </div>
+          
+          <div class="reply-field">
+            <label>API Key</label>
+            <input
+              type="password"
+              x-model="settingsApiKey"
+              placeholder="your-secret-api-key"
+            >
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn btn-ghost" @click="localStorage.removeItem("gamil_workerUrl"); localStorage.removeItem("gamil_apiKey"); settingsWorkerUrl=""; settingsApiKey=""; settingsSuccess="Settings cleared. Enter new values.";">Reset to Defaults</button>
+          <button class="btn btn-secondary" @click="closeSettings()">Cancel</button>
+          <button class="btn btn-primary" @click="saveSettings()">Save & Connect</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+</body>
+</html>
