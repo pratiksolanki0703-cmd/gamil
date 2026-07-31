@@ -220,17 +220,22 @@ export default {
 
 ### Step 6: Deploy Frontend (GitHub Pages)
 
-The frontend auto-deploys to GitHub Pages when you push to `main` branch.
+The frontend is a **single HTML file** - no build step needed!
 
-1. Push your code:
+1. Edit `frontend/index.html`:
+   - Click the ⚙️ Settings button in the app
+   - Enter your Worker URL and API Key
+   - OR open `index.html` in a text editor and find the CONFIG section
+
+2. Push your code:
    ```bash
    git push origin main
    ```
 
-2. Go to GitHub → **Settings** → **Pages**
-3. Under **Source**, select **GitHub Actions**
-4. Wait for deployment (~2 minutes)
-5. Your site will be live at:
+3. Go to GitHub → **Settings** → **Pages**
+4. Under **Source**, select **GitHub Actions**
+5. Wait for deployment (~1 minute)
+6. Your site will be live at:
    ```
    https://YOUR_USERNAME.github.io/gamil/
    ```
@@ -321,10 +326,10 @@ This stack is **completely free** for most users:
 - Check Worker logs for errors
 
 **Frontend not loading?**
-- Check `frontend/.env.local` → `NEXT_PUBLIC_API_URL` is correct
+- Click ⚙️ Settings button and verify Worker URL is correct
 - Verify Worker is deployed and accessible
-- Check `workerUrl` in `config.js` is correct
 - Check browser console for CORS errors
+- Make sure Worker's FRONTEND_URL matches your GitHub Pages URL
 
 ## 🤝 Contributing
 

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<!--
+  ============================================
+  📧 GAMIL - Email Management Frontend
+  ============================================
+  
+  ⚠️ HOW TO CONFIGURE:
+  
+  1. Open this file in any text editor
+  2. Find the CONFIG section in the <script> at the bottom
+  3. OR use the ⚙️ Settings button in the app
+  
+  That's it! No build step, no npm, no Node.js required.
+  Just edit and push to GitHub Pages!
+  ============================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>text2tool.in - Email | Self-Hosted Email Management</title>
+  <meta name="description" content="A free, self-hosted email management system like Zoho Mail. Manage your custom domain emails with a beautiful Gmail-like interface.">
+  <meta name="keywords" content="email, self-hosted, cloudflare, email management, zoho alternative">
+  <meta name="author" content="Pratik Solanki">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="text2tool.in - Email">
+  <meta property="og:description" content="Self-hosted email management system">
+  <meta property="og:type" content="website">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            glass: 'rgba(255, 255, 255, 0.1)',
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Alpine.js -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  
+  <style>
+    /* Custom styles */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+      50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.8); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    .fade-in-delay-1 { animation: fadeIn 0.3s ease-out 0.1s both; }
+    .fade-in-delay-2 { animation: fadeIn 0.3s ease-out 0.2s both; }
+    .fade-in-delay-3 { animation: fadeIn 0.3s ease-out 0.3s both; }
+    .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+    .spin-slow { animation: spin-slow 3s linear infinite; }
+    .hover-lift { transition: transform 0.2s, box-shadow 0.2s; }
+    .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    
+    .glass {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 0.5rem;
+    }
+    .skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; }
+    .skeleton-title { height: 16px; width: 60%; margin-bottom: 8px; }
+    .skeleton-text { height: 12px; width: 100%; margin-bottom: 4px; }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+    
+    /* Mobile sidebar */
+    @media (max-width: 768px) {
+      .sidebar-mobile { transform: translateX(-100%); transition: transform 0.3s; }
+      .sidebar-mobile.open { transform: translateX(0); }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen" x-data="emailApp()" x-init="init()">
+  
+  <!-- Mobile Menu Button -->
+  <button 
+    @click="sidebarOpen = !sidebarOpen"
+    class="md:hidden fixed top-4 left-4 z-50 glass rounded-xl p-3 shadow-lg"
+  >
+    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
+
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside 
+      :class="sidebarOpen ? 'open' : ''"
+      class="sidebar-mobile md:translate-x-0 fixed md:static z-40 w-80 glass border-r border-white/20 flex flex-col h-full"
+    >
+      <!-- Header -->
+      <div class="p-5 border-b border-white/20">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+            <span class="text-xl">📧</span>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold gradient-text">Email</h1>
+            <p class="text-xs text-gray-500">text2tool.in</p>
+          </div>
+        </div>
+        
+        <!-- Search Box -->
+        <div class="relative">
+          <input
+            type="text"
+            placeholder="Search emails..."
+            x-model="searchQuery"
+            class="w-full px-4 py-3 pl-10 glass rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+          >
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Email Filter Tabs -->
+      <div class="border-b border-white/20 px-2 py-2">
+        <div class="flex gap-1 overflow-x-auto">
+          <button
+            @click="selectedEmail = 'all'"
+            :class="selectedEmail === 'all' 
+              ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg' 
+              : 'text-gray-600 hover:bg-white/50'"
+            class="px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-all"
+          >
+            📥 All Mail
+          </button>
+          <template x-for="email in emailAddresses.filter(e => e && !e.includes('noreply')).slice(0, 4)" :key="email">
+            <button
+              @click="selectedEmail = email"
+              :class="selectedEmail === email 
+                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg' 
+                : 'text-gray-600 hover:bg-white/50'"
+              class="px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-all"
+              x-text="email.split('@')[0]"
+            ></button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Conversations List -->
+      <div class="flex-1 overflow-y-auto p-3">
+        <!-- Loading Skeletons -->
+        <template x-if="loading">
+          <div class="space-y-3">
+            <template x-for="i in 5" :key="i">
+              <div class="glass rounded-xl p-4">
+                <div class="flex items-start gap-3">
+                  <div class="skeleton skeleton-avatar"></div>
+                  <div class="flex-1">
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text w-full"></div>
+                    <div class="skeleton skeleton-text w-2/3"></div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <!-- Empty State -->
+        <template x-if="!loading && filteredConversations.length === 0">
+          <div class="text-center py-12">
+            <div class="text-4xl mb-3">📭</div>
+            <p class="text-gray-500">No conversations yet</p>
+            <p class="text-xs text-gray-400 mt-1">Send an email to get started!</p>
+          </div>
+        </template>
+
+        <!-- Conversation List -->
+        <template x-if="!loading && filteredConversations.length > 0">
+          <div class="space-y-2">
+            <template x-for="(conv, index) in filteredConversations" :key="conv.id">
+              <div
+                @click="selectConversation(conv.id)"
+                :class="selectedConversation?.id === conv.id 
+                  ? 'ring-2 ring-blue-500/50 bg-blue-500/10' 
+                  : ''"
+                class="glass rounded-xl p-4 cursor-pointer hover-lift transition-all"
+                :style="'animation-delay: ' + (index * 0.05) + 's'"
+              >
+                <div class="flex justify-between items-start mb-2">
+                  <h3 :class="conv.unread_count > 0 ? 'font-bold text-gray-900' : 'font-medium text-gray-700'" 
+                      class="text-sm truncate flex-1" x-text="conv.subject"></h3>
+                  <template x-if="conv.unread_count > 0">
+                    <span class="ml-2 px-2 py-0.5 text-xs font-medium bg-blue-500 text-white rounded-full" x-text="conv.unread_count"></span>
+                  </template>
+                </div>
+                <p class="text-xs text-gray-500 truncate mb-2" x-text="conv.last_message_preview"></p>
+                <div class="flex justify-between items-center">
+                  <span class="text-xs text-gray-400 truncate max-w-[60%]" x-text="conv.last_sender"></span>
+                  <span class="text-xs text-gray-400" x-text="formatDate(conv.last_message_at)"></span>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+
+      <!-- Footer -->
+      <div class="p-4 border-t border-white/20 text-center">
+        <p class="text-xs text-gray-400">
+          Built by <a href="https://text2tool.in" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-600">Pratik Solanki</a>
+        </p>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col md:ml-0">
+      <!-- Error Message -->
+      <template x-if="error">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 m-4 rounded fade-in" x-text="error"></div>
+      </template>
+
+      <!-- Conversation View -->
+      <template x-if="selectedConversation">
+        <div class="flex flex-col h-full">
+          <!-- Header -->
+          <div class="glass border-b border-white/20 p-5">
+            <div class="flex justify-between items-center">
+              <div class="flex-1 ml-12 md:ml-0">
+                <h2 class="text-xl font-bold gradient-text" x-text="selectedConversation.subject"></h2>
+                <p class="text-sm text-gray-500 mt-1" x-text="selectedConversation.participants?.join(' • ')"></p>
+              </div>
+              <button
+                @click="showReply = true; replyTo = null"
+                class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200 font-medium flex items-center gap-2"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                </svg>
+                Reply
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages -->
+          <div class="flex-1 overflow-y-auto p-6 space-y-4">
+            <template x-if="messages.length === 0">
+              <div class="text-center py-12">
+                <div class="text-4xl mb-3">💬</div>
+                <p class="text-gray-500">No messages in this conversation</p>
+              </div>
+            </template>
+            
+            <template x-for="(msg, index) in messages" :key="msg.id">
+              <div
+                :class="msg.is_outgoing 
+                  ? 'ml-0 md:ml-12 bg-gradient-to-r from-blue-500/10 to-purple-500/10' 
+                  : 'mr-0 md:mr-12'"
+                class="glass rounded-2xl p-5 fade-in"
+                :style="'animation-delay: ' + (index * 0.1) + 's'"
+              >
+                <div class="flex justify-between items-start mb-3">
+                  <div class="flex items-center gap-3">
+                    <div :class="msg.is_outgoing 
+                      ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
+                      : 'bg-gradient-to-br from-gray-400 to-gray-600'"
+                      class="w-10 h-10 rounded-full flex items-center justify-center text-white font-medium">
+                      <span x-text="msg.from_email?.charAt(0).toUpperCase()"></span>
+                    </div>
+                    <div>
+                      <p class="font-semibold text-gray-800" x-text="msg.from_email"></p>
+                      <p class="text-xs text-gray-500">To: <span x-text="msg.to_email"></span></p>
+                    </div>
+                  </div>
+                  <span class="text-xs text-gray-400 bg-white/50 px-3 py-1 rounded-full" x-text="formatDateTime(msg.received_at)"></span>
+                </div>
+                <div class="mt-3 text-gray-700 whitespace-pre-wrap leading-relaxed pl-13" x-text="msg.body"></div>
+                <template x-if="!msg.is_outgoing">
+                  <button
+                    @click="showReply = true; replyTo = msg"
+                    class="mt-4 text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 hover:gap-2 transition-all"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                    </svg>
+                    Reply
+                  </button>
+                </template>
+              </div>
+            </template>
+          </div>
+
+          <!-- Reply Box -->
+          <template x-if="showReply">
+            <div class="glass border-t border-white/20 p-6 fade-in">
+              <div class="flex justify-between items-center mb-5">
+                <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                  <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                  </svg>
+                  <span x-text="replyTo ? 'Reply to ' + replyTo.from_email : 'New Email'"></span>
+                </h3>
+                <button
+                  @click="showReply = false; replyTo = null; replyError = ''"
+                  class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                >✕</button>
+              </div>
+
+              <template x-if="replyError">
+                <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-center gap-2">
+                  <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span x-text="replyError"></span>
+                </div>
+              </template>
+
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">To</label>
+                  <input
+                    type="email"
+                    x-model="replyToEmail"
+                    class="w-full px-4 py-3 glass rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                    placeholder="recipient@example.com"
+                  >
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                  <input
+                    type="text"
+                    x-model="replySubject"
+                    class="w-full px-4 py-3 glass rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                  >
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                  <textarea
+                    x-model="replyBody"
+                    rows="5"
+                    class="w-full px-4 py-3 glass rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none transition-all"
+                    placeholder="Type your reply..."
+                  ></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                  <button
+                    @click="showReply = false; replyTo = null; replyError = ''"
+                    class="px-6 py-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-all font-medium"
+                  >Cancel</button>
+                  <button
+                    @click="sendReply()"
+                    :disabled="sending"
+                    class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all font-medium flex items-center gap-2"
+                  >
+                    <template x-if="sending">
+                      <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4 spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Sending...
+                      </span>
+                    </template>
+                    <template x-if="!sending">
+                      <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                        Send Reply
+                      </span>
+                    </template>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+
+      <!-- Empty State -->
+      <template x-if="!selectedConversation">
+        <div class="flex-1 flex flex-col items-center justify-center p-8">
+          <div class="glass rounded-3xl p-10 max-w-lg w-full text-center fade-in">
+            <!-- Animated Icon -->
+            <div class="relative mb-6">
+              <div class="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center pulse-glow">
+                <span class="text-5xl">📧</span>
+              </div>
+              <div class="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+                <span class="text-white text-sm">✓</span>
+              </div>
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-3xl font-bold mb-3 gradient-text">text2tool.in - Email</h1>
+            
+            <!-- Subtitle -->
+            <p class="text-gray-600 mb-8 text-lg">Your self-hosted email management system</p>
+
+            <!-- Getting Started Card -->
+            <div class="glass rounded-2xl p-6 text-left fade-in-delay-1">
+              <h2 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <span class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">1</span>
+                Getting Started
+              </h2>
+              <ul class="space-y-3">
+                <li class="flex items-center gap-3 text-gray-600 fade-in-delay-1">
+                  <span>✅</span><span>Configure your domain in worker.js</span>
+                </li>
+                <li class="flex items-center gap-3 text-gray-600 fade-in-delay-1">
+                  <span>✅</span><span>Set up Cloudflare Email Routing</span>
+                </li>
+                <li class="flex items-center gap-3 text-gray-600 fade-in-delay-2">
+                  <span>✅</span><span>Deploy your Worker to Cloudflare</span>
+                </li>
+                <li class="flex items-center gap-3 text-gray-600 fade-in-delay-2">
+                  <span>✅</span><span>Edit config.js with your Worker URL</span>
+                </li>
+                <li class="flex items-center gap-3 text-gray-600 fade-in-delay-3">
+                  <span>🚀</span><span>Start receiving emails!</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="grid grid-cols-2 gap-4 mt-6 fade-in-delay-2">
+              <div class="glass rounded-xl p-4 text-center hover-lift cursor-pointer">
+                <span class="text-2xl mb-2 block">📨</span>
+                <span class="text-sm text-gray-600">Receive Emails</span>
+              </div>
+              <div class="glass rounded-xl p-4 text-center hover-lift cursor-pointer">
+                <span class="text-2xl mb-2 block">📤</span>
+                <span class="text-sm text-gray-600">Send Emails</span>
+              </div>
+              <div class="glass rounded-xl p-4 text-center hover-lift cursor-pointer">
+                <span class="text-2xl mb-2 block">💬</span>
+                <span class="text-sm text-gray-600">Threading</span>
+              </div>
+              <div class="glass rounded-xl p-4 text-center hover-lift cursor-pointer">
+                <span class="text-2xl mb-2 block">🔍</span>
+                <span class="text-sm text-gray-600">Search</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Credit Footer -->
+          <div class="mt-8 text-center fade-in-delay-3">
+            <p class="text-gray-500 text-sm">
+              Built with ❤️ by 
+              <a href="https://text2tool.in" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-medium transition-colors">Pratik Solanki</a>
+            </p>
+            <p class="text-gray-400 text-xs mt-1">text2tool.in • Open Source Email Management</p>
+          </div>
+        </div>
+      </template>
+    </main>
+  </div>
+
+  <!-- Config Modal -->
+  <template x-if="showConfigModal">
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showConfigModal = false">
+      <div class="glass rounded-3xl p-8 max-w-md w-full fade-in">
+        <h2 class="text-xl font-bold gradient-text mb-4">⚙️ Configure Settings</h2>
+        <p class="text-gray-600 mb-6 text-sm">Enter your Cloudflare Worker URL and API Key to connect.</p>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Worker URL</label>
+            <input
+              type="url"
+              x-model="configInput.workerUrl"
+              class="w-full px-4 py-3 glass rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              placeholder="https://your-worker.workers.dev"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+            <input
+              type="password"
+              x-model="configInput.apiKey"
+              class="w-full px-4 py-3 glass rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              placeholder="your-secret-api-key"
+            >
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-3 mt-6">
+          <button @click="showConfigModal = false" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-all">Cancel</button>
+          <button @click="saveConfig()" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-medium">Save</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Settings Button (fixed) -->
+  <button 
+    @click="showConfigModal = true"
+    class="fixed bottom-6 right-6 z-50 glass rounded-full p-4 shadow-lg hover-lift"
+    title="Settings"
+  >
+    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  </button>
+
+  <script>
+    // ============================================
+    // CONFIGURATION - Users edit this section!
+    // ============================================
+    const CONFIG = {
+      // Your Cloudflare Worker URL (required)
+      workerUrl: localStorage.getItem('workerUrl') || '',
+      
+      // Your API Key (required) 
+      apiKey: localStorage.getItem('apiKey') || '',
+    };
+
+    // ============================================
+    // API Client
+    // ============================================
+    async function apiCall(endpoint, options = {}) {
+      if (!CONFIG.workerUrl) {
+        throw new Error('Worker URL not configured. Click the settings button ⚙️ to configure.');
+      }
+      
+      const url = `${CONFIG.workerUrl}${endpoint}`;
+      const headers = {
+        'Content-Type': 'application/json',
+        'X-API-Key': CONFIG.apiKey,
+        ...options.headers,
+      };
+
+      const response = await fetch(url, { ...options, headers });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(error.error || `API error: ${response.status}`);
+      }
+
+      return response.json();
+    }
+
+    // ============================================
+    // Alpine.js App
+    // ============================================
+    function emailApp() {
+      return {
+        // State
+        conversations: [],
+        selectedConversation: null,
+        messages: [],
+        loading: true,
+        error: null,
+        searchQuery: '',
+        selectedEmail: 'all',
+        emailAddresses: [],
+        sidebarOpen: false,
+        
+        // Reply
+        showReply: false,
+        replyTo: null,
+        replyToEmail: '',
+        replySubject: '',
+        replyBody: '',
+        sending: false,
+        replyError: '',
+        
+        // Config modal
+        showConfigModal: false,
+        configInput: {
+          workerUrl: CONFIG.workerUrl,
+          apiKey: CONFIG.apiKey,
+        },
+
+        // Initialize
+        async init() {
+          if (!CONFIG.workerUrl) {
+            this.showConfigModal = true;
+            this.loading = false;
+            return;
+          }
+          await this.fetchConfig();
+          await this.fetchConversations();
+        },
+
+        // Fetch config (email addresses)
+        async fetchConfig() {
+          try {
+            const config = await apiCall('/api/config');
+            this.emailAddresses = config.emails || [];
+          } catch (err) {
+            console.error('Failed to fetch config:', err);
+          }
+        },
+
+        // Fetch conversations
+        async fetchConversations() {
+          try {
+            this.loading = true;
+            this.error = null;
+            const data = await apiCall('/api/conversations');
+            this.conversations = data.conversations || [];
+          } catch (err) {
+            console.error('Failed to fetch conversations:', err);
+            this.error = err.message;
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        // Select conversation
+        async selectConversation(id) {
+          try {
+            this.error = null;
+            const data = await apiCall(`/api/conversations/${id}`);
+            this.selectedConversation = data.conversation;
+            this.messages = data.messages || [];
+            this.sidebarOpen = false;
+
+            await apiCall('/api/mark-read', {
+              method: 'POST',
+              body: JSON.stringify({ conversation_id: id, mark_all: true }),
+            });
+
+            this.conversations = this.conversations.map(c =>
+              c.id === id ? { ...c, unread_count: 0 } : c
+            );
+          } catch (err) {
+            console.error('Failed to fetch conversation:', err);
+            this.error = err.message;
+          }
+        },
+
+        // Send reply
+        async sendReply() {
+          if (!this.replyToEmail || !this.replyBody) {
+            this.replyError = 'Please fill in all fields';
+            return;
+          }
+
+          try {
+            this.sending = true;
+            this.replyError = '';
+
+            await apiCall('/api/send-email', {
+              method: 'POST',
+              body: JSON.stringify({
+                to: this.replyToEmail,
+                subject: this.replySubject,
+                body: this.replyBody,
+                conversation_id: this.selectedConversation.id,
+              }),
+            });
+
+            this.showReply = false;
+            this.replyTo = null;
+            this.replyBody = '';
+            await this.fetchConversations();
+          } catch (err) {
+            this.replyError = err.message;
+          } finally {
+            this.sending = false;
+          }
+        },
+
+        // Save config
+        saveConfig() {
+          CONFIG.workerUrl = this.configInput.workerUrl;
+          CONFIG.apiKey = this.configInput.apiKey;
+          localStorage.setItem('workerUrl', CONFIG.workerUrl);
+          localStorage.setItem('apiKey', CONFIG.apiKey);
+          this.showConfigModal = false;
+          this.init();
+        },
+
+        // Filtered conversations
+        get filteredConversations() {
+          let filtered = this.conversations;
+
+          if (this.selectedEmail !== 'all') {
+            filtered = filtered.filter(conv =>
+              conv.received_by_email?.toLowerCase() === this.selectedEmail.toLowerCase()
+            );
+          }
+
+          if (this.searchQuery) {
+            const query = this.searchQuery.toLowerCase();
+            filtered = filtered.filter(conv =>
+              conv.subject?.toLowerCase().includes(query) ||
+              conv.participants?.some(p => p.toLowerCase().includes(query)) ||
+              conv.last_message_preview?.toLowerCase().includes(query)
+            );
+          }
+
+          return filtered;
+        },
+
+        // Helpers
+        formatDate(dateStr) {
+          if (!dateStr) return '';
+          const date = new Date(dateStr);
+          const now = new Date();
+          const diff = now - date;
+          
+          if (diff < 86400000) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          }
+          return date.toLocaleDateString();
+        },
+
+        formatDateTime(dateStr) {
+          if (!dateStr) return '';
+          return new Date(dateStr).toLocaleString();
+        },
+      };
+    }
+  </script>
+</body>
+</html>
