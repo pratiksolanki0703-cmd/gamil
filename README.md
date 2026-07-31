@@ -14,8 +14,9 @@ A free, self-hosted alternative to Zoho Business Mail. Manage your custom domain
 - ✅ **Multiple Email Addresses** - Handle multiple emails per domain
 - ✅ **Email Threading** - Conversations are grouped like Gmail
 - ✅ **Send & Receive** - Full email functionality via Resend API
-- ✅ **Beautiful UI** - Modern, responsive interface with Tailwind CSS
+- ✅ **Beautiful UI** - Gmail-like interface with glass morphism design
 - ✅ **Free Hosting** - GitHub Pages (frontend) + Cloudflare (backend)
+- ✅ **No Build Step** - Just edit config and push to GitHub!
 - ✅ **Open Source** - Fork, customize, and deploy your own instance
 
 ## 🏗️ Architecture
@@ -52,11 +53,12 @@ A free, self-hosted alternative to Zoho Business Mail. Manage your custom domain
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────┐
-│              FRONTEND (Next.js on GitHub Pages)           │
+│           FRONTEND (HTML/CSS/JS on GitHub Pages)        │
 │                                                         │
 │  - Gmail-like interface                                 │
-│  - Conversation threading                               │
+│  - Inbox, Sent, All Mail views                          │
 │  - Search, compose, reply                               │
+│  - No build step required!                              │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -119,157 +121,51 @@ Quick Summary:
 3. **Secrets:** Worker Settings → Variables → Add karo
 4. **Email Routing:** Domain → Email → Routing enable karo
 
-### Step 2: Configure
+### Step 2: Configure Frontend
 
-Edit `config.js` with your details:
+Edit `frontend/js/config.js` with your details:
 
 ```javascript
-export default {
+const APP_CONFIG = {
+  // Your Cloudflare Worker URL
+  workerUrl: "https://your-worker.workers.dev",
+  
+  // Your API Key
+  apiKey: "your-secret-api-key",
+  
+  // Display settings (optional)
   domain: "yourdomain.com",
-  emails: [
-    "hello@yourdomain.com",
-    "support@yourdomain.com"
-  ],
-  defaultFromEmail: "hello@yourdomain.com",
+  emails: ["hello@yourdomain.com", "support@yourdomain.com"],
   senderName: "Your Name",
-  workerUrl: "https://your-worker.workers.dev", // Will fill after deploying worker
-  frontendUrl: "https://YOUR_USERNAME.github.io/gamil",  // GitHub Pages URL
+  defaultFromEmail: "hello@yourdomain.com",
 };
 ```
 
-> ⚠️ **Important:** `config.js` is for documentation only. The frontend uses `.env.local` for API URL.
-> Create `frontend/.env.local` with:
-> ```
-> NEXT_PUBLIC_API_URL=https://your-worker.workers.dev
-> NEXT_PUBLIC_API_KEY=your-api-key-here
-> ```
+**OR** use the ⚙️ Settings button in the app to configure via UI.
 
-### Step 3: Setup Cloudflare Worker
+### Step 3: Deploy Frontend (GitHub Pages)
 
-1. Install Wrangler CLI:
-   ```bash
-   npm install -g wrangler
-   ```
+The frontend is a **single HTML file with JS/CSS** - no build step needed!
 
-2. Login to Cloudflare:
-   ```bash
-   wrangler login
-   ```
-
-3. Create D1 Database:
-   ```bash
-   cd worker
-   wrangler d1 create gamil-emails
-   ```
-
-4. Copy the database ID and add it to `wrangler.toml`:
-   ```toml
-   [[d1_databases]]
-   binding = "DB"
-   database_name = "gamil-emails"
-   database_id = "YOUR_DATABASE_ID_HERE"
-   ```
-
-5. Initialize Database:
-   ```bash
-   wrangler d1 execute gamil-emails --file=./schema.sql
-   ```
-
-6. Set Environment Variables:
-   ```bash
-   wrangler secret put RESEND_API_KEY
-   wrangler secret put FRONTEND_URL
-   wrangler secret put API_KEY
-   wrangler secret put CONFIGURED_EMAILS
-   ```
-
-   > **Note:** Generate a secure API_KEY for authentication. Example:
-   > ```bash
-   > wrangler secret put API_KEY
-   > # Enter a secure random string when prompted
-   > ```
-   
-   > **Note:** CONFIGURED_EMAILS is a comma-separated list of email addresses:
-   > ```bash
-   > wrangler secret put CONFIGURED_EMAILS
-   > # Enter: hello@yourdomain.com,support@yourdomain.com
-   > ```
-
-7. Deploy Worker:
-   ```bash
-   wrangler deploy
-   ```
-
-8. Copy your worker URL (e.g., `https://gamil-worker.YOUR_SUBDOMAIN.workers.dev`)
-
-### Step 4: Setup Cloudflare Email Routing
-
-1. Go to Cloudflare Dashboard → Select your domain
-2. Navigate to **Email** → **Email Routing**
-3. Enable Email Routing
-4. Add DNS records as instructed (MX and TXT records)
-5. Create email addresses (e.g., `hello@yourdomain.com`)
-6. Set destination to your Worker
-
-### Step 5: Setup Resend
-
-1. Go to [Resend Dashboard](https://resend.com)
-2. Add your domain and verify DNS records
-3. Create an API key
-4. Add the API key to your Worker environment variables
-
-### Step 6: Deploy Frontend (GitHub Pages)
-
-The frontend is a **single HTML file** - no build step needed!
-
-1. Edit `frontend/index.html`:
-   - Click the ⚙️ Settings button in the app
-   - Enter your Worker URL and API Key
-   - OR open `index.html` in a text editor and find the CONFIG section
-
-2. Push your code:
+1. Push your code:
    ```bash
    git push origin main
    ```
 
-3. Go to GitHub → **Settings** → **Pages**
-4. Under **Source**, select **GitHub Actions**
-5. Wait for deployment (~1 minute)
-6. Your site will be live at:
+2. Go to GitHub → **Settings** → **Pages**
+3. Under **Source**, select **GitHub Actions**
+4. Wait for deployment (~1 minute)
+5. Your site will be live at:
    ```
    https://YOUR_USERNAME.github.io/gamil/
    ```
 
 > ⚠️ **Important:** Make sure GitHub Pages is enabled in your repo Settings → Pages → Source: "GitHub Actions"
 
-5. Update `config.js` with your GitHub Pages URL:
-   ```javascript
-   frontendUrl: "https://YOUR_USERNAME.github.io/gamil"
-   ```
-
-## 🔧 Configuration Reference
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `domain` | Your custom domain | `text2tool.in` |
-| `emails` | Array of email addresses to handle | `["hello@text2tool.in"]` |
-| `defaultFromEmail` | Default sender email | `hello@text2tool.in` |
-| `senderName` | Name shown in sent emails | `Text2Tool` |
-| `workerUrl` | Your Cloudflare Worker URL | `https://gamil-worker.workers.dev` |
-| `frontendUrl` | Your GitHub Pages URL | `https://username.github.io/gamil` |
-
-**Frontend Environment Variables** (create `frontend/.env.local`):
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `NEXT_PUBLIC_API_URL` | Your Worker URL | `https://your-worker.workers.dev` |
-| `NEXT_PUBLIC_API_KEY` | Your API key (same as Worker secret) | `your-secret-api-key` |
-
 ## 📁 Project Structure
 
 ```
 gamil/
-├── config.js              # Configuration file (EDIT THIS!)
 ├── worker.js              # ⭐ Cloudflare Worker (main file to edit)
 ├── setup.sh               # CLI setup script
 ├── MANUAL-SETUP.md        # Dashboard setup guide
@@ -279,18 +175,41 @@ gamil/
 │   └── deploy.yml
 ├── worker/                # Worker supporting files
 │   └── schema.sql         # Database schema
-└── frontend/              # Next.js Frontend
-    ├── .env.local         # Environment variables (CREATE THIS!)
-    ├── lib/api.js         # API client
-    ├── app/
-    │   ├── layout.js
-    │   ├── page.js
-    │   └── globals.css
-    └── components/
-        ├── Sidebar.js
-        ├── ConversationView.js
-        ├── ReplyBox.js
-        └── EmptyState.js
+└── frontend/              # Static Frontend (GitHub Pages)
+    ├── index.html         # Main entry point
+    ├── css/
+    │   └── styles.css     # Glass morphism, animations
+    └── js/
+        ├── config.js      # ⭐ User configuration (EDIT THIS!)
+        ├── api.js         # API client for Worker
+        ├── utils.js       # Helper functions
+        └── app.js         # Alpine.js app logic
+```
+
+## 🔧 Configuration Reference
+
+### Frontend Config (`frontend/js/config.js`)
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `workerUrl` | Your Cloudflare Worker URL | `https://gamil-worker.workers.dev` |
+| `apiKey` | Your API key (same as Worker secret) | `your-secret-api-key` |
+| `domain` | Your custom domain | `text2tool.in` |
+| `emails` | Array of email addresses | `["hello@text2tool.in"]` |
+| `senderName` | Name shown in sent emails | `Text2Tool` |
+| `defaultFromEmail` | Default sender email | `hello@text2tool.in` |
+
+### Worker Config (`worker.js`)
+
+Edit the `CONFIG` object at the top of `worker.js`:
+
+```javascript
+const CONFIG = {
+  domain: "YOUR_DOMAIN",           // e.g., "text2tool.in"
+  emails: "YOUR_EMAILS",           // e.g., "hello@text2tool.in,support@text2tool.in"
+  defaultFromEmail: "YOUR_FROM_EMAIL", // e.g., "hello@text2tool.in"
+  senderName: "YOUR_SENDER_NAME",  // e.g., "Text2Tool"
+};
 ```
 
 ## 💰 Cost Breakdown
@@ -308,10 +227,9 @@ This stack is **completely free** for most users:
 ## 🔐 Security Notes
 
 - Never commit your API keys to Git
-- Use `wrangler secret put` for sensitive variables
+- Use the ⚙️ Settings button to save API key (stored in browser localStorage)
 - Set `FRONTEND_URL` in Worker to your GitHub Pages URL for CORS security
 - Example: `wrangler secret put FRONTEND_URL` → enter `https://YOUR_USERNAME.github.io`
-- Consider adding authentication if making public
 
 ## 🐛 Troubleshooting
 
@@ -356,7 +274,7 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 🙏 Credits
 
 - Built with Cloudflare Workers, D1, and Email Routing
-- Frontend powered by Next.js and Tailwind CSS
+- Frontend powered by HTML, CSS, Tailwind CSS CDN, and Alpine.js
 - Email sending via Resend
 - Glass morphism UI design
 
