@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS messages (
     conversation_id INTEGER NOT NULL,
     message_id TEXT UNIQUE NOT NULL,
     in_reply_to TEXT,
-    "references" TEXT,
+    email_ref TEXT,
     from_email TEXT NOT NULL,
     to_email TEXT NOT NULL,
     subject TEXT NOT NULL,
@@ -148,33 +148,35 @@ const CONFIG = {
 
 ## Step 4: Set Variables in Worker
 
-1. Go to your worker → **Settings** tab
-2. Scroll down to **"Variables and Secrets"**
-3. Click **"+ Add"** button
-
-**Add these variables one by one:**
-
 ### 4.1 Add D1 Database Binding
 
-1. Click **"+ Add"** → Select **"D1 database"**
-2. Variable name: `DB`
-3. D1 database: Select `gamil-emails`
-4. Click **"Add binding"**
+> **⚠️ D1 Binding is NOT in "Variables and Secrets" - it's in a separate section!**
+
+1. Go to your worker → **Settings** tab
+2. Click **"Bindings"** in the left sidebar (NOT "Variables and Secrets")
+3. Click **"Add binding"** button
+4. Select **"D1 database"**
+5. Variable name: `DB`
+6. D1 database: Select `gamil-emails`
+7. Click **"Add binding"**
 
 ### 4.2 Add Secrets
 
-Click **"+ Add"** → Select **"Secret"** for each:
+1. Go back to **Settings** tab → **"Variables and Secrets"** section
+2. Click **"+ Add"** button → Select **"Secret"**
+
+Add these secrets one by one:
 
 | Secret Name | Value | Where to Get |
 |-------------|-------|--------------|
 | `RESEND_API_KEY` | `re_xxxxx` | [resend.com](https://resend.com) → API Keys |
 | `API_KEY` | `any_random_string` | Make up your own (e.g., `my_secret_key_123`) |
 
-> **⚠️ IMPORTANT:** The `API_KEY` you set here MUST be the SAME key you use in frontend `.env.local` file (Step 6.2). Don't forget this!
+> **⚠️ IMPORTANT:** The `API_KEY` you set here MUST be the SAME key you use in frontend settings (Step 6). Don't forget this!
 
-### 4.3 Add Variables
+### 4.3 Add Environment Variables
 
-Click **"+ Add"** → Select **"Text"** for each:
+In the same **"Variables and Secrets"** section, click **"+ Add"** → Select **"Text"**
 
 | Variable Name | Value |
 |---------------|-------|
