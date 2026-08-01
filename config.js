@@ -5,23 +5,23 @@
 
 export default {
   // Your custom domain (e.g., hello@text2tool.in)
-  domain: "text2tool.in",
+  domain: "tempmillo.qzz.io",
   
   // Email addresses to handle (display only)
   emails: [
-    "hello@text2tool.in",
+    "hello@tempmilo.qzz.io",
     "support@text2tool.in",
     "admin@text2tool.in"
   ],
   
   // Default "From" email for display
-  defaultFromEmail: "hello@text2tool.in",
+  defaultFromEmail: "hello@tempmilo.qzz.io",
   
   // Your name (displayed in sent emails)
-  senderName: "Text2Tool",
+  senderName: "Tempmilo",
   
   // Cloudflare Worker URL (public)
-  workerUrl: "https://your-worker.your-subdomain.workers.dev",
+  workerUrl: "https://gamil-worker.kiyih69254.workers.dev/",
   
   // Frontend URL (GitHub Pages)
   // Username badlo apna GitHub username se
