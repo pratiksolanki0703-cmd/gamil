@@ -20,11 +20,11 @@ const APP_CONFIG = {
   
   // Your Cloudflare Worker URL
   // Example: "https://gamil-worker.your-subdomain.workers.dev"
-  workerUrl: "",
+  workerUrl: "https://gamil-worker.kiyih69254.workers.dev/",
   
   // Your API Key (must match Worker's API_KEY secret)
   // Generate a random string and use it in both places
-  apiKey: "",
+  apiKey: "my_secret_key_123",
   
   // ============================================
   // DISPLAY SETTINGS (Optional - for UI labels)
@@ -32,7 +32,7 @@ const APP_CONFIG = {
   
   // Your domain name
   // Example: "text2tool.in"
-  domain: "",
+  domain: "tempmilo.qzz.io",
   
   // Email addresses to display in sidebar tabs
   // These are for UI display only - actual validation happens in Worker
