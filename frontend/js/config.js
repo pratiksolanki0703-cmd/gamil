@@ -63,14 +63,8 @@ const APP_CONFIG = {
   conversationsPerPage: 20,
 };
 
-// Save to localStorage for persistence
-if (typeof localStorage !== 'undefined') {
-  // Load saved settings
-  const savedWorkerUrl = localStorage.getItem('gamil_workerUrl');
-  const savedApiKey = localStorage.getItem('gamil_apiKey');
-  
-  if (savedWorkerUrl) APP_CONFIG.workerUrl = savedWorkerUrl;
-  if (savedApiKey) APP_CONFIG.apiKey = savedApiKey;
-}
+// Config.js values are the source of truth
+// localStorage is only used as fallback in api.js getConfig()
+// To change settings: edit this file OR use the ⚙️ Settings button in the app
 
 // Export for use in other files
