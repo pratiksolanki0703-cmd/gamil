@@ -53,8 +53,6 @@ Step 7: Done! 🎉
 3. **📋 COPY the entire SQL below** and paste it:
 
 ```sql
--- GAMIL Database Schema
-
 CREATE TABLE IF NOT EXISTS conversations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject TEXT NOT NULL,
