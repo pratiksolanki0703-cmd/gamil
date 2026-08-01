@@ -49,9 +49,11 @@ const GamilAPI = {
    * Get config from localStorage or APP_CONFIG
    */
   getConfig() {
+    // config.js values take priority; localStorage only used if config.js is empty
+    const appConfig = typeof APP_CONFIG !== 'undefined' ? APP_CONFIG : {};
     const config = {
-      workerUrl: localStorage.getItem('gamil_workerUrl') || (typeof APP_CONFIG !== 'undefined' ? APP_CONFIG.workerUrl : ''),
-      apiKey: localStorage.getItem('gamil_apiKey') || (typeof APP_CONFIG !== 'undefined' ? APP_CONFIG.apiKey : ''),
+      workerUrl: appConfig.workerUrl || localStorage.getItem('gamil_workerUrl') || '',
+      apiKey: appConfig.apiKey || localStorage.getItem('gamil_apiKey') || '',
     };
     return config;
   },
