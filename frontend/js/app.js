@@ -51,9 +51,10 @@ function gamilApp() {
     // ============================================
     
     async init() {
-      // Load saved settings
-      this.settingsWorkerUrl = localStorage.getItem('gamil_workerUrl') || '';
-      this.settingsApiKey = localStorage.getItem('gamil_apiKey') || '';
+      // Load from config.js first, then localStorage
+      const appConfig = typeof APP_CONFIG !== 'undefined' ? APP_CONFIG : {};
+      this.settingsWorkerUrl = appConfig.workerUrl || localStorage.getItem('gamil_workerUrl') || '';
+      this.settingsApiKey = appConfig.apiKey || localStorage.getItem('gamil_apiKey') || '';
       
       // Check if configured
       if (!this.settingsWorkerUrl || !this.settingsApiKey) {
