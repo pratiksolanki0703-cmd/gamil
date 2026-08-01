@@ -206,6 +206,14 @@ function gamilApp() {
       this.settingsSuccess = '';
     },
     
+    resetSettings() {
+      localStorage.removeItem('gamil_workerUrl');
+      localStorage.removeItem('gamil_apiKey');
+      this.settingsWorkerUrl = '';
+      this.settingsApiKey = '';
+      this.settingsSuccess = 'Settings cleared. Enter new values.';
+    },
+    
     async saveSettings() {
       this.settingsError = '';
       this.settingsSuccess = '';
