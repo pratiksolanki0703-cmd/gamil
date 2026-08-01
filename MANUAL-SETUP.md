@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS messages (
     conversation_id INTEGER NOT NULL,
     message_id TEXT UNIQUE NOT NULL,
     in_reply_to TEXT,
-    references TEXT,
+    "references" TEXT,
     from_email TEXT NOT NULL,
     to_email TEXT NOT NULL,
     subject TEXT NOT NULL,
