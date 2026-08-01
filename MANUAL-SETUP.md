@@ -223,39 +223,39 @@ In the same **"Variables and Secrets"** section, click **"+ Add"** → Select **
 
 ## Step 6: Setup Frontend
 
+> **Frontend is a static HTML site - NO build step needed!**
+
 ### 6.1 Get Your Worker URL
 
 1. Go to your worker → **Settings** tab
 2. Copy the **"Production URL"** (e.g., `https://gamil-worker.your-subdomain.workers.dev`)
 
-### 6.2 Update Frontend Config
+### 6.2 Configure Frontend
 
-1. Open `frontend/.env.local` from your downloaded folder
-2. Change the values:
+1. Open `frontend/js/config.js` from your downloaded folder
+2. Change these values:
 
+```javascript
+const APP_CONFIG = {
+  workerUrl: "YOUR_WORKER_URL",  // CHANGE: Your worker URL
+  apiKey: "YOUR_API_KEY",        // CHANGE: Your API key from Step 4
+};
 ```
-NEXT_PUBLIC_API_URL=https://gamil-worker.your-subdomain.workers.dev
-NEXT_PUBLIC_API_KEY=your_api_key_here
-```
 
-**Replace:**
-- `https://gamil-worker.your-subdomain.workers.dev` → Your actual worker URL
-- `your_api_key_here` → The API_KEY you set in Step 4
+**Or** configure later via the **⚙️ Settings button** in the frontend UI.
 
-### 6.3 Deploy to Vercel (Free)
+### 6.3 Deploy to GitHub Pages (Free)
 
-1. Go to: https://vercel.com
-2. Sign up with GitHub
-3. Click **"Add New"** → **"Project"**
-4. Import your GitHub repository
-5. **Root Directory:** `frontend`
-6. Click **"Deploy"**
-7. ✅ Done! You'll get a URL like `https://gamil.vercel.app`
+1. Push your code to GitHub
+2. Go to your repo → **Settings** → **Pages**
+3. **Source:** Select **"GitHub Actions"**
+4. Wait 1-2 minutes for deployment
+5. ✅ Done! Your URL: `https://YOUR-USERNAME.github.io/gamil/`
 
 ### 6.4 Update CORS in Worker
 
-1. Go back to your worker → **Settings** → **Variables**
-2. Update `FRONTEND_URL` with your Vercel URL
+1. Go back to your worker → **Settings** → **Variables and Secrets**
+2. Update `FRONTEND_URL` with your GitHub Pages URL
 3. Click **"Save"**
 
 ---
