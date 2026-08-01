@@ -194,8 +194,9 @@ function gamilApp() {
     // ============================================
     
     openSettings() {
-      this.settingsWorkerUrl = localStorage.getItem('gamil_workerUrl') || '';
-      this.settingsApiKey = localStorage.getItem('gamil_apiKey') || '';
+      const appConfig = typeof APP_CONFIG !== 'undefined' ? APP_CONFIG : {};
+      this.settingsWorkerUrl = appConfig.workerUrl || localStorage.getItem('gamil_workerUrl') || '';
+      this.settingsApiKey = appConfig.apiKey || localStorage.getItem('gamil_apiKey') || '';
       this.settingsError = '';
       this.settingsSuccess = '';
       this.showSettings = true;
