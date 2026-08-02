@@ -9,9 +9,7 @@ export default {
   
   // Email addresses to handle (display only)
   emails: [
-    "hello@tempmilo.qzz.io",
-    "support@text2tool.in",
-    "admin@text2tool.in"
+    "hello@tempmilo.qzz.io"
   ],
   
   // Default "From" email for display
