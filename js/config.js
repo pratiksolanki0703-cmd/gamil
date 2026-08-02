@@ -40,11 +40,11 @@ const APP_CONFIG = {
   
   // Sender name for display
   // Example: "Text2Tool"
-  senderName: "",
+  senderName: "tempmilo",
   
   // Default "From" email for display
   // Example: "hello@text2tool.in"
-  defaultFromEmail: "",
+  defaultFromEmail: "hello@tempmilo.qzz.io",
   
   // ============================================
   // UI SETTINGS
