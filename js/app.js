@@ -51,9 +51,10 @@ function gamilApp() {
     // ============================================
     
     async init() {
-      // Load saved settings
-      this.settingsWorkerUrl = localStorage.getItem('gamil_workerUrl') || '';
-      this.settingsApiKey = localStorage.getItem('gamil_apiKey') || '';
+      // Load from config.js first, then localStorage
+      const appConfig = typeof APP_CONFIG !== 'undefined' ? APP_CONFIG : {};
+      this.settingsWorkerUrl = appConfig.workerUrl || localStorage.getItem('gamil_workerUrl') || '';
+      this.settingsApiKey = appConfig.apiKey || localStorage.getItem('gamil_apiKey') || '';
       
       // Check if configured
       if (!this.settingsWorkerUrl || !this.settingsApiKey) {
@@ -193,8 +194,9 @@ function gamilApp() {
     // ============================================
     
     openSettings() {
-      this.settingsWorkerUrl = localStorage.getItem('gamil_workerUrl') || '';
-      this.settingsApiKey = localStorage.getItem('gamil_apiKey') || '';
+      const appConfig = typeof APP_CONFIG !== 'undefined' ? APP_CONFIG : {};
+      this.settingsWorkerUrl = appConfig.workerUrl || localStorage.getItem('gamil_workerUrl') || '';
+      this.settingsApiKey = appConfig.apiKey || localStorage.getItem('gamil_apiKey') || '';
       this.settingsError = '';
       this.settingsSuccess = '';
       this.showSettings = true;
@@ -204,6 +206,14 @@ function gamilApp() {
       this.showSettings = false;
       this.settingsError = '';
       this.settingsSuccess = '';
+    },
+    
+    resetSettings() {
+      localStorage.removeItem('gamil_workerUrl');
+      localStorage.removeItem('gamil_apiKey');
+      this.settingsWorkerUrl = '';
+      this.settingsApiKey = '';
+      this.settingsSuccess = 'Settings cleared. Enter new values.';
     },
     
     async saveSettings() {

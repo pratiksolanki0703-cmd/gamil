@@ -20,11 +20,11 @@ const APP_CONFIG = {
   
   // Your Cloudflare Worker URL
   // Example: "https://gamil-worker.your-subdomain.workers.dev"
-  workerUrl: "",
+  workerUrl: "https://gamil-worker.kiyih69254.workers.dev/",
   
   // Your API Key (must match Worker's API_KEY secret)
   // Generate a random string and use it in both places
-  apiKey: "",
+  apiKey: "my_secret_key_123",
   
   // ============================================
   // DISPLAY SETTINGS (Optional - for UI labels)
@@ -32,7 +32,7 @@ const APP_CONFIG = {
   
   // Your domain name
   // Example: "text2tool.in"
-  domain: "",
+  domain: "tempmilo.qzz.io",
   
   // Email addresses to display in sidebar tabs
   // These are for UI display only - actual validation happens in Worker
@@ -63,14 +63,8 @@ const APP_CONFIG = {
   conversationsPerPage: 20,
 };
 
-// Save to localStorage for persistence
-if (typeof localStorage !== 'undefined') {
-  // Load saved settings
-  const savedWorkerUrl = localStorage.getItem('gamil_workerUrl');
-  const savedApiKey = localStorage.getItem('gamil_apiKey');
-  
-  if (savedWorkerUrl) APP_CONFIG.workerUrl = savedWorkerUrl;
-  if (savedApiKey) APP_CONFIG.apiKey = savedApiKey;
-}
+// Config.js values are the source of truth
+// localStorage is only used as fallback in api.js getConfig()
+// To change settings: edit this file OR use the ⚙️ Settings button in the app
 
 // Export for use in other files

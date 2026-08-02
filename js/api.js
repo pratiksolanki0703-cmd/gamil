@@ -17,7 +17,8 @@ const GamilAPI = {
       throw new Error('Worker URL not configured. Click ⚙️ Settings to configure.');
     }
 
-    const url = `${config.workerUrl}${endpoint}`;
+    const baseUrl = config.workerUrl.replace(/\/$/, '');
+    const url = `${baseUrl}${endpoint}`;
     const headers = {
       'Content-Type': 'application/json',
       'X-API-Key': config.apiKey,
@@ -48,9 +49,11 @@ const GamilAPI = {
    * Get config from localStorage or APP_CONFIG
    */
   getConfig() {
+    // config.js values take priority; localStorage is fallback
+    const appConfig = typeof APP_CONFIG !== 'undefined' ? APP_CONFIG : {};
     const config = {
-      workerUrl: localStorage.getItem('gamil_workerUrl') || (typeof APP_CONFIG !== 'undefined' ? APP_CONFIG.workerUrl : ''),
-      apiKey: localStorage.getItem('gamil_apiKey') || (typeof APP_CONFIG !== 'undefined' ? APP_CONFIG.apiKey : ''),
+      workerUrl: appConfig.workerUrl || localStorage.getItem('gamil_workerUrl') || '',
+      apiKey: appConfig.apiKey || localStorage.getItem('gamil_apiKey') || '',
     };
     return config;
   },
