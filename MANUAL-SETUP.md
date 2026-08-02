@@ -232,7 +232,7 @@ In the same **"Variables and Secrets"** section, click **"+ Add"** → Select **
 
 ### 6.2 Configure Frontend
 
-1. Open `frontend/js/config.js` from your downloaded folder
+1. Open `js/config.js` from your downloaded folder
 2. Change these values:
 
 ```javascript
@@ -297,7 +297,7 @@ GAMIL supports **multiple custom emails** with separate inboxes:
 |---------|----------|
 | Emails not arriving | Check Email Routing is enabled, MX records correct |
 | Worker error | Check worker logs: Workers & Pages → Logs |
-| Frontend shows error | Check `FRONTEND_URL` in worker variables matches your Vercel URL |
+| Frontend shows error | Check `FRONTEND_URL` in worker variables matches your GitHub Pages URL |
 | CORS error | Update `FRONTEND_URL` variable in worker settings |
 
 ---
@@ -308,7 +308,7 @@ GAMIL supports **multiple custom emails** with separate inboxes:
 |------|-------|
 | Cloudflare Dashboard | https://dash.cloudflare.com |
 | Resend API Keys | https://resend.com/api-keys |
-| Vercel Dashboard | https://vercel.com/dashboard |
+| GitHub Pages | https://github.com/YOUR-USERNAME/gamil/settings/pages |
 | Your Worker | https://dash.cloudflare.com → Workers & Pages |
 | Your D1 Database | https://dash.cloudflare.com → Storage → D1 |
 
